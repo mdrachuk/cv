@@ -1,0 +1,11 @@
+site_name: serious
+repo_url: https://github.com/mdrachuk/cv/
+repo_name: GitHub
+site_author: mdrachuk
+site_description: Check version of a Python module
+
+theme: readthedocs
+
+markdown_extensions:
+  - toc:
+      permalink: "#"
