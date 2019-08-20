@@ -19,8 +19,9 @@ setup(
     long_description_content_type='text/markdown',
     url="https://github.com/mdrachuk/cv",
     license="MIT",
-    keywords="python version pypi",
+    keywords="python packaging version pypi",
     python_requires=">=3.7",
+    scripts=['cv'],
     project_urls={
         'Pipelines': 'https://dev.azure.com/misha-drachuk/cv',
         'Source': 'https://github.com/mdrachuk/cv/',

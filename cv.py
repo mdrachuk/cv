@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 This module is querying PyPI to check if the current version set to package is already present on PyPI.
 
@@ -7,7 +8,7 @@ Finishes with an VersionExists exception and a non-zero exit code if the version
 """
 from __future__ import annotations
 
-__version__ = '1.0.0.dev1'
+__version__ = '1.0.0.dev2'
 
 from dataclasses import dataclass
 from typing import Dict, Set, List
