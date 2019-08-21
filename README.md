@@ -44,3 +44,5 @@ __main__.VersionExists: Package "module" with version "7.7.7" already exists on 
 
 ## Package Example
 Packages work in the same way as modules except `__version__` is defined in `module/__init__.py`
+
+[pypi]: https://pypi.org/project/cv/
