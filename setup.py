@@ -19,8 +19,10 @@ setup(
     long_description_content_type='text/markdown',
     url="https://github.com/mdrachuk/cv",
     license="MIT",
-    keywords="python version pypi",
+    keywords="python packaging version pypi ci",
     python_requires=">=3.7",
+    scripts=['cv'],
+    zip_safe=False,
     project_urls={
         'Pipelines': 'https://dev.azure.com/misha-drachuk/cv',
         'Source': 'https://github.com/mdrachuk/cv/',
@@ -28,7 +30,7 @@ setup(
     },
     install_requires=[
         'requests>=2.22.0',
-        'serious==1.0.0.dev18',
+        'serious==1.0.0.dev20',
     ],
     classifiers=[
         "Intended Audience :: Developers",

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 This module is querying PyPI to check if the current version set to package is already present on PyPI.
 
@@ -7,9 +8,12 @@ Finishes with an VersionExists exception and a non-zero exit code if the version
 """
 from __future__ import annotations
 
-__version__ = '1.0.0.dev1'
+__version__ = '1.0.0.dev3'
 
+import sys
+from argparse import ArgumentParser
 from dataclasses import dataclass
+from importlib import import_module
 from typing import Dict, Set, List
 
 import requests
@@ -26,7 +30,12 @@ def check_unique(name: str, version: str):
 
 def fetch(name: str) -> PypiPackage:
     model = JsonModel(PypiPackage, allow_unexpected=True, allow_any=True)
-    package_json = requests.get(f'https://pypi.org/pypi/{name}/json').text
+    response = requests.get(f'https://pypi.org/pypi/{name}/json')
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        raise PypiError(name) from e
+    package_json = response.text
     return model.load(package_json)
 
 
@@ -40,7 +49,6 @@ class PypiPackage:
 
     def contains_version(self, target: str) -> bool:
         target = safe_version(target)
-
         existing = {safe_version(version) for version in self.versions}
         return target in existing
 
@@ -48,11 +56,30 @@ class PypiPackage:
 class VersionExists(Exception):
     def __init__(self, name: str, version: str):
         super().__init__(f'Package "{name}" with version "{version}" already exists on PyPI. '
-                         f'You can change the version in "version.py".')
+                         f'Change the "{name}.__version__" or "{name}.__init__.__version__" to fix this error.')
+
+
+class PypiError(Exception):
+    def __init__(self, name: str):
+        super().__init__(f'Package "{name}" could not be fetched from PyPI. ')
+
+
+parser = ArgumentParser(description='Check version of a Python package or module.')
+parser.add_argument('module', type=str, help='the package/module to check')
+
+
+def _parse_args(args):
+    parameters = parser.parse_args(args)
+    module_name = parameters.module
+    module = import_module(module_name)
+    return module_name, module.__version__
+
+
+def main(args):
+    # TODO:mdrachuk:2019-08-20: add option to check version format
+    name, version = _parse_args(args)
+    check_unique(name, version)
 
 
 if __name__ == '__main__':
-    # TODO:mdrachuk:2019-08-20: import version from provided module
-    # TODO:mdrachuk:2019-08-20: add option to check version format
-    # TODO:mdrachuk:2019-08-20: add version manipulation (increment..)
-    check_unique('cv', __version__)
+    main(sys.argv[1:])
