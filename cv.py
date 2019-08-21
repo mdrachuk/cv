@@ -8,13 +8,12 @@ Finishes with an VersionExists exception and a non-zero exit code if the version
 """
 from __future__ import annotations
 
-import sys
-from argparse import ArgumentParser
-from importlib import import_module
-
 __version__ = '1.0.0.dev3'
 
+import sys
+from argparse import ArgumentParser
 from dataclasses import dataclass
+from importlib import import_module
 from typing import Dict, Set, List
 
 import requests
