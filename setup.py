@@ -19,7 +19,7 @@ setup(
     long_description_content_type='text/markdown',
     url="https://github.com/mdrachuk/cv",
     license="MIT",
-    keywords="python packaging version pypi",
+    keywords="python packaging version pypi ci",
     python_requires=">=3.7",
     scripts=['cv'],
     project_urls={
