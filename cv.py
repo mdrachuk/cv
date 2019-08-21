@@ -8,8 +8,9 @@ Finishes with an VersionExists exception and a non-zero exit code if the version
 """
 from __future__ import annotations
 
-__version__ = '1.0.0.dev4'
+__version__ = '1.0.0.dev5'
 
+import os
 import sys
 from argparse import ArgumentParser
 from dataclasses import dataclass
@@ -82,4 +83,5 @@ def main(args):
 
 
 if __name__ == '__main__':
+    sys.path.append(os.getcwd())
     main(sys.argv[1:])
