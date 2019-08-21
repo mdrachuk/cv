@@ -57,7 +57,7 @@ class PypiPackage:
 class VersionExists(Exception):
     def __init__(self, name: str, version: str):
         super().__init__(f'Package "{name}" with version "{version}" already exists on PyPI. '
-                         f'You can change the "{name}.__version__".')
+                         f'Change the "{name}.__version__" or "{name}.__init__.__version__" to fix this error.')
 
 
 class PypiError(Exception):

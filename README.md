@@ -3,25 +3,44 @@
 [![Build Status](https://img.shields.io/azure-devops/build/misha-drachuk/cv/8)](https://dev.azure.com/misha-drachuk/cv/_build/latest?definitionId=8&branchName=master)
 [![Test Coverage](https://img.shields.io/coveralls/github/mdrachuk/cv/master)](https://coveralls.io/github/mdrachuk/cv)
 [![Supported Python](https://img.shields.io/pypi/pyversions/cv)][pypi]
-[![Documentation](https://img.shields.io/readthedocs/cv)][docs]
 
 Check version of a Python module.
 
-[Documentation][docs]
+Queries PyPI and looks for the `<module>.__version__` among all available versions.
+Raises an error if the version already exists.
 
+Comes useful during CI PR checks.
 
-## Features
-TBD
-
-## Basics
-### Installation
+## Installation
 Available from [PyPI][pypi]:
 ```shell
 pip install cv
 ```
 
-### Quick Example
-TBD
+## Module Example
+With a "module" present on PyPI and `module.py` in current directory:
+```python
+__version__ = '7.7.7'
 
-[pypi]: https://pypi.org/project/cv/
-[docs]: https://cv.readthedocs.io/en/latest/ 
+...
+```
+
+Simply run:
+```shell
+cv module
+```
+
+If `7.7.7` version of `module` is on PyPI already you’ll get a `VersionExists` error:
+```plain
+Traceback (most recent call last):
+  File "./cv", line 86, in <module>
+    main(sys.argv[1:])
+  File "./cv", line 82, in main
+    check_unique(name, version)
+  File "./cv", line 28, in check_unique
+    raise VersionExists(name, version)
+__main__.VersionExists: Package "module" with version "7.7.7" already exists on PyPI. Change the "module.__version__" to fix this error.
+```
+
+## Package Example
+Packages work in the same way as modules except `__version__` is defined in `module/__init__.py`
