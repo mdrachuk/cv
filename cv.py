@@ -87,7 +87,6 @@ def _resolve_module(module_name: str):
 
 
 def main(args):
-    # TODO:mdrachuk:2019-08-20: add option to check version format
     name, version = _parse_args(args)
     check_unique(name, version)
 
