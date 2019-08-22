@@ -10,7 +10,7 @@ Check version of a Python module.
 Queries PyPI and looks for the `<module>.__version__` among all available versions.
 Raises an error if the version already exists.
 
-Comes useful during CI PR checks.
+Comes in handy in CI to remember changing library version.
 
 For more on Python module versioning check out [PEP-440](https://www.python.org/dev/peps/pep-0440). 
 
