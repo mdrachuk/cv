@@ -79,10 +79,10 @@ def _parse_args(args: List[str]):
 def _resolve_module(module_name: str):
     """Black magic. Prevents loading a package from cv dependencies."""
     invalidate_caches()
-    old_module = sys.modules.get(module_name, None)
-    del sys.modules[module_name]
+    old_module = sys.modules.pop(module_name, None)
     module = import_module(module_name)
-    sys.modules[module_name] = old_module
+    if old_module:
+        sys.modules[module_name] = old_module
     return module
 
 
