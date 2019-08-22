@@ -1,5 +1,6 @@
 # cv
 [![PyPI](https://img.shields.io/pypi/v/cv)][pypi]
+[![Downloads](https://img.shields.io/pypi/dm/cv)][pypi]
 [![Build Status](https://img.shields.io/azure-devops/build/misha-drachuk/cv/9)](https://dev.azure.com/misha-drachuk/cv/_build/latest?definitionId=9&branchName=master)
 [![Test Coverage](https://img.shields.io/coveralls/github/mdrachuk/cv/master)](https://coveralls.io/github/mdrachuk/cv)
 [![Supported Python](https://img.shields.io/pypi/pyversions/cv)][pypi]
