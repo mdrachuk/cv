@@ -39,7 +39,8 @@ Traceback (most recent call last):
     check_unique(name, version)
   File "./cv", line 28, in check_unique
     raise VersionExists(name, version)
-__main__.VersionExists: Package "module" with version "7.7.7" already exists on PyPI. Change the "module.__version__" to fix this error.
+__main__.VersionExists: Package "module" with version "7.7.7" already exists on PyPI.
+Change the "module.__version__" to fix this error.
 ```
 
 ## Package Example
