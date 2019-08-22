@@ -8,13 +8,13 @@ Finishes with an VersionExists exception and a non-zero exit code if the version
 """
 from __future__ import annotations
 
-__version__ = '1.0.0.dev5'
+__version__ = '1.0.0.dev6'
 
 import os
 import sys
 from argparse import ArgumentParser
 from dataclasses import dataclass
-from importlib import import_module
+from importlib import invalidate_caches, import_module
 from typing import Dict, Set, List
 
 import requests
@@ -69,19 +69,28 @@ parser = ArgumentParser(description='Check version of a Python package or module
 parser.add_argument('module', type=str, help='the package/module to check')
 
 
-def _parse_args(args):
+def _parse_args(args: List[str]):
     parameters = parser.parse_args(args)
     module_name = parameters.module
-    module = import_module(module_name)
+    module = _resolve_module(module_name)
     return module_name, module.__version__
 
 
+def _resolve_module(module_name: str):
+    """Black magic. Prevents loading a package from cv dependencies."""
+    invalidate_caches()
+    old_module = sys.modules.pop(module_name, None)
+    module = import_module(module_name)
+    if old_module:
+        sys.modules[module_name] = old_module
+    return module
+
+
 def main(args):
-    # TODO:mdrachuk:2019-08-20: add option to check version format
     name, version = _parse_args(args)
     check_unique(name, version)
 
 
 if __name__ == '__main__':
-    sys.path.append(os.getcwd())
+    sys.path.insert(0, os.getcwd())
     main(sys.argv[1:])
