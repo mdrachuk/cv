@@ -11,6 +11,8 @@ Raises an error if the version already exists.
 
 Comes useful during CI PR checks.
 
+For more on Python module versioning check out [PEP-440](https://www.python.org/dev/peps/pep-0440). 
+
 ## Installation
 Available from [PyPI][pypi]:
 ```shell
