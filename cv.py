@@ -8,14 +8,15 @@ Finishes with an VersionExists exception and a non-zero exit code if the version
 """
 from __future__ import annotations
 
-__version__ = '1.0.0.dev6'
+__version__ = '1.0.0.dev7'
 
 import os
 import sys
+from datetime import datetime
 from argparse import ArgumentParser
 from dataclasses import dataclass
 from importlib import invalidate_caches, import_module
-from typing import Dict, Set, List
+from typing import Dict, Set, List, Any, Optional
 
 import requests
 from pkg_resources import safe_version
@@ -30,19 +31,22 @@ def check_unique(name: str, version: str):
 
 
 def fetch(name: str) -> PypiPackage:
-    model = JsonModel(PypiPackage, allow_unexpected=True, allow_any=True)
     response = requests.get(f'https://pypi.org/pypi/{name}/json')
     try:
         response.raise_for_status()
     except requests.exceptions.HTTPError as e:
         raise PypiError(name) from e
     package_json = response.text
+    model = JsonModel(PypiPackage, allow_any=True, camel_case=False)
     return model.load(package_json)
 
 
 @dataclass
 class PypiPackage:
-    releases: Dict[str, List]
+    info: PackageInfo
+    releases: Dict[str, List[Release]]
+    last_serial: int
+    urls: List[Release]
 
     @property
     def versions(self) -> Set[str]:
@@ -52,6 +56,49 @@ class PypiPackage:
         target = safe_version(target)
         existing = {safe_version(version) for version in self.versions}
         return target in existing
+
+@dataclass
+class PackageInfo:
+    name: str
+    author: str
+    author_email: str
+    bugtrack_url: Optional[str]
+    classifiers: List[str]
+    description: str
+    description_content_type: str
+    docs_url: Optional[str]
+    download_url: str
+    downloads: Dict[str, int]
+    home_page: str
+    keywords: str
+    license: str
+    maintainer: str
+    maintainer_email: str
+    package_url: str
+    platform: str
+    project_url: str
+    project_urls: Dict[str, str]
+    release_url: str
+    requires_dist: Optional[List[str]]
+    requires_python: str
+    summary: str
+    version: str
+
+
+@dataclass
+class Release:
+    comment_text: str
+    digests: Dict[str, str]
+    downloads: int
+    filename: str
+    has_sig: bool
+    md5_digest: str
+    packagetype: str
+    python_version: str
+    requires_python: str
+    size: int
+    upload_time: datetime
+    url: str
 
 
 class VersionExists(Exception):

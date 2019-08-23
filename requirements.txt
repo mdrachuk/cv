@@ -3,6 +3,6 @@ mypy==0.720
 pytest==4.4.1
 pytest-cov==2.6.1
 requests==2.22.0
-serious==1.0.0.dev20
+serious==1.0.0.dev21
 twine==1.13.0
 wheel==0.33.6
