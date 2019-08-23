@@ -8,7 +8,7 @@ Finishes with an VersionExists exception and a non-zero exit code if the version
 """
 from __future__ import annotations
 
-__version__ = '1.0.0.dev7'
+__version__ = '1.0.0.dev8'
 
 import os
 import sys
