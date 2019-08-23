@@ -21,7 +21,7 @@ pip install cv
 ```
 
 ## Module Example
-With a <module> present on PyPI and `<module>.py` in current directory:
+With a \<module\> present on PyPI and `<module>.py` in current directory:
 ```python
 __version__ = '7.7.7'
 
@@ -33,7 +33,7 @@ Simply run:
 cv <module>
 ```
 
-If `7.7.7` version of <module> is on PyPI already you’ll get a `VersionExists` error:
+If `7.7.7` version of \<module\> is on PyPI already you’ll get a `VersionExists` error:
 ```plain
 Traceback (most recent call last):
   File "./cv", line 86, in <module>
