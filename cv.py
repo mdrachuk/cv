@@ -8,7 +8,7 @@ Finishes with an VersionExists exception and a non-zero exit code if the version
 """
 from __future__ import annotations
 
-__version__ = '1.0.0.dev11'
+__version__ = '1.0.0rc0'
 
 import json
 from enum import IntFlag
@@ -79,8 +79,8 @@ class VersionTypeMismatch(Exception):
 
 class InvalidVersionFormat(Exception):
     def __init__(self, name: str, version: str):
-        super().__init__(f'Package "{name}" version "{version}" is not formatted according to PEP 440.'
-                         f'Proper version may be "{safe_version(version)}.'
+        super().__init__(f'Package "{name}" version "{version}" is not formatted according to PEP 440. '
+                         f'Proper version may be "{safe_version(version)}. '
                          f'Read more: https://www.python.org/dev/peps/pep-0440/')
 
 

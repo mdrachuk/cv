@@ -8,13 +8,13 @@
 Check version of a Python module.
 
 Raises an error if the `<module>.__version__`:
-- already present on PyPI; 
+- already present on PyPI or custom warehouse deployment; 
 - does not match [PEP 440](https://www.python.org/dev/peps/pep-0440);
 - or does not match specified type: alpha/beta/rc/dev/release.
 
-All of this comes in handy during CI. 
+All of this comes in handy during CI.
 
-Also: No runtime dependencies!
+And one more thing: No runtime dependencies!
 
 ## Installation
 Available from [PyPI][pypi]:
@@ -37,13 +37,6 @@ cv <module>
 
 If `7.7.7` version of \<module\> is on PyPI already you’ll get a `VersionExists` error:
 ```plain
-Traceback (most recent call last):
-  File "./cv", line 86, in <module>
-    main(sys.argv[1:])
-  File "./cv", line 82, in main
-    check_unique(name, version)
-  File "./cv", line 28, in check_unique
-    raise VersionExists(name, version)
 __main__.VersionExists: Package "<module>" with version "7.7.7" already exists on PyPI.
 Change the "<module>.__version__" to fix this error.
 ```
@@ -53,7 +46,7 @@ Packages work in the same way as modules except `__version__` is defined in `<mo
 
 
 ## Help
-```shell
+```plain
 $ cv --help
 usage: cv [-h] [-w WAREHOUSE] [--alpha] [--beta] [--rc] [--dev] [--release]
           [--dry]
