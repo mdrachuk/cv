@@ -8,11 +8,11 @@ Finishes with an VersionExists exception and a non-zero exit code if the version
 """
 from __future__ import annotations
 
+__version__ = '1.0.0.dev9'
+
 import json
 from urllib.error import HTTPError
 from urllib.request import urlopen
-
-__version__ = '1.0.0.dev9'
 
 import os
 import sys
