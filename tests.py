@@ -1,3 +1,8 @@
+import json
+import threading
+from contextlib import contextmanager
+from http import HTTPStatus
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from uuid import uuid4
 
 import pytest
@@ -80,3 +85,55 @@ def test_invalid_version_type():
         main(['test_modules.valid_beta', '--alpha', '--dry'])
     with pytest.raises(VersionTypeMismatch):
         main(['test_modules.valid_release', '--dev', '--dry'])
+
+
+class WarehousePass(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(HTTPStatus.OK)
+        self.send_header("Content-type", "application/json")
+        self.end_headers()
+        self.wfile.write(json.dumps({"releases": {}}).encode(encoding='utf8'))
+
+    def log_message(self, format, *args):
+        pass
+
+
+class WarehouseFail(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(HTTPStatus.NOT_FOUND)
+        self.end_headers()
+
+    def log_message(self, format, *args):
+        pass
+
+
+class ServerThread(threading.Thread):
+    def __init__(self, server: HTTPServer):
+        super().__init__()
+        self.server = server
+
+    def run(self):
+        self.server.serve_forever()
+
+    def stop(self):
+        self.server.shutdown()
+
+
+@contextmanager
+def background_server(port, request_handler):
+    test_server = HTTPServer(('localhost', port), request_handler)
+    thread = ServerThread(test_server)
+    thread.start()
+    yield
+    thread.stop()
+
+
+def test_warehouse():
+    with background_server(1337, WarehousePass):
+        assert check_unique('cv', '1.0.0', 'http://localhost:1337') is None
+
+
+def test_invalid_warehouse():
+    with background_server(1337, WarehouseFail):
+        with pytest.raises(PypiError):
+            check_unique('cv', '1.0.0', 'http://localhost:1337')
