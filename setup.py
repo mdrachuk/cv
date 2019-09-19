@@ -28,10 +28,7 @@ setup(
         'Source': 'https://github.com/mdrachuk/cv/',
         'Issues': 'https://github.com/mdrachuk/cv/issues',
     },
-    install_requires=[
-        'requests>=2.22.0',
-        'serious==1.0.0.dev20',
-    ],
+    install_requires=[],
     classifiers=[
         "Intended Audience :: Developers",
         "Topic :: Utilities",
