@@ -70,7 +70,7 @@ def test_restrict_invalid_combinations():
     with pytest.raises(InvalidRequirements):
         main(['test_modules.valid_release', '--beta', '--rc'])
     with pytest.raises(InvalidRequirements):
-        main(['test_modules.valid_release', '--alpha', '--rc'])
+        main(['test_modules.valid_release', '--rc', '--alpha'])
 
 
 def test_invalid_version_type():

@@ -132,8 +132,6 @@ def _parse_version_type(parameters):
             raise InvalidRequirements('--alpha, --beta and --rc cannot be combined')
         version_type = VersionType.BETA
     elif parameters.rc:
-        if any([parameters.alpha, parameters.beta]):
-            raise InvalidRequirements('--alpha, --beta and --rc cannot be combined')
         version_type = VersionType.RC
     else:
         version_type = VersionType.RELEASE
