@@ -7,17 +7,14 @@
 
 Check version of a Python module.
 
-Queries PyPI and looks for the `<module>.__version__` among all available versions.
-Raises an error if the version already exists.
+Raises an error if the `<module>.__version__`:
+- already present on PyPI; 
+- does not match [PEP 440](https://www.python.org/dev/peps/pep-0440);
+- or does not match specified type: alpha/beta/rc/dev/release.
 
-Comes in handy in CI to remember changing library version.
+All of this comes in handy during CI. 
 
-- PyPI version uniqueness check
-- PEP 440 version format check
-- Check version type: alpha/beta/rc/dev/release
-- No runtime dependencies
-
-For more on Python module versioning check out [PEP-440](https://www.python.org/dev/peps/pep-0440).
+Also: No runtime dependencies!
 
 ## Installation
 Available from [PyPI][pypi]:
@@ -53,5 +50,27 @@ Change the "<module>.__version__" to fix this error.
 
 ## Package Example
 Packages work in the same way as modules except `__version__` is defined in `<module>/__init__.py`
+
+
+## Help
+```shell
+$ cv --help
+usage: Provide a module with "__version__" or a package with "__init__.py" defining a "__version__".
+cv will search PyPI and raise an exception if such a version exists or if the version is malformed.
+
+Check version of a Python package or module.
+
+positional arguments:
+  module      the package/module to check
+
+optional arguments:
+  -h, --help  show this help message and exit
+  --alpha     check that version is an alpha, e.g. 1.0.0a1
+  --beta      check that version is a beta, e.g. 1.0.0b2
+  --rc        check that version is a release candidate, e.g. 1.0.0rc
+  --dev       check that version is in development, e.g. 1.0.0.dev3
+  --release   check that version is a release without modifiers, e.g. 1.0.0
+  --dry       make no request to PyPI
+```
 
 [pypi]: https://pypi.org/project/cv/
