@@ -12,7 +12,12 @@ Raises an error if the version already exists.
 
 Comes in handy in CI to remember changing library version.
 
-For more on Python module versioning check out [PEP-440](https://www.python.org/dev/peps/pep-0440). 
+- PyPI version uniqueness check
+- PEP 440 version format check
+- Check version type: alpha/beta/rc/dev/release
+- No runtime dependencies
+
+For more on Python module versioning check out [PEP-440](https://www.python.org/dev/peps/pep-0440).
 
 ## Installation
 Available from [PyPI][pypi]:
