@@ -30,9 +30,15 @@ def check_unique(name: str, version: str):
         raise PypiError(name) from e
     data = json.loads(response.read())
     versions = set(data['releases'].keys())
-    if safe_version(version) in versions:
+    if version in versions:
         raise VersionExists(name, version)
-    print(f'OK: {name} {version} is not present on PyPI.')
+
+
+class InvalidVersionFormat(Exception):
+    def __init__(self, name: str, version: str):
+        super().__init__(f'Package "{name}" version "{version}" is not formatted according to PEP 440.'
+                         f'Proper version may be "{safe_version(version)}.'
+                         f'Read more: https://www.python.org/dev/peps/pep-0440/')
 
 
 class VersionExists(Exception):
@@ -67,9 +73,16 @@ def _resolve_module(module_name: str):
     return module
 
 
+def check_version_format(name: str, version: str):
+    if safe_version(version) != version:
+        raise InvalidVersionFormat(name, version)
+
+
 def main(args):
     name, version = _parse_args(args)
+    check_version_format(name, version)
     check_unique(name, version)
+    print(f'OK: {name} {version} is valid and not present on PyPI.')
 
 
 if __name__ == '__main__':
