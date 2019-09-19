@@ -11,6 +11,7 @@ from __future__ import annotations
 __version__ = '1.0.0.dev10'
 
 import json
+from enum import IntFlag
 from urllib.error import HTTPError
 from urllib.request import urlopen
 
@@ -18,7 +19,7 @@ import os
 import sys
 from argparse import ArgumentParser
 from importlib import invalidate_caches, import_module
-from typing import List
+from typing import List, Tuple, Any, Optional
 
 from pkg_resources import safe_version
 
@@ -32,6 +33,16 @@ def check_unique(name: str, version: str):
     versions = set(data['releases'].keys())
     if version in versions:
         raise VersionExists(name, version)
+
+
+class InvalidRequirements(Exception):
+    ...
+
+
+class VersionTypeMismatch(Exception):
+    def __init__(self, name: str, version: str, actual: VersionType, expected: VersionType):
+        super().__init__(f'Package "{name}" version {version} was specified to be {repr(expected)}, '
+                         f'but actually it is {repr(actual)} ')
 
 
 class InvalidVersionFormat(Exception):
@@ -55,15 +66,79 @@ class PypiError(Exception):
 parser = ArgumentParser(description='Check version of a Python package or module.')
 parser.add_argument('module', type=str, help='the package/module to check')
 
+parser.add_argument('--alpha', action='store_true', default=False,
+                    help='check that version is an alpha, e.g. 1.0.0a1')
+parser.add_argument('--beta', action='store_true', default=False,
+                    help='check that version is an beta, e.g. 1.0.0b2')
+parser.add_argument('--rc', action='store_true', default=False,
+                    help='check that version is a release candidate, e.g. 1.0.0rc')
 
-def _parse_args(args: List[str]):
+parser.add_argument('--dev', action='store_true', default=False,
+                    help='check that version is a release in development, e.g. 1.0.0.dev3')
+
+parser.add_argument('--release', action='store_true', default=False,
+                    help='check that version is a release without modifiers, e.g. 1.0.0')
+
+parser.add_argument('--dry', action='store_true', default=False,
+                    help='make no request to PyPI')
+
+
+class VersionType(IntFlag):
+    RELEASE = 0
+    ALPHA = 1
+    BETA = 2
+    RC = 4
+    DEV = 8
+
+    @classmethod
+    def parse(cls, version: str) -> VersionType:
+        version_type = cls.RELEASE
+        if 'a' in version:
+            version_type |= cls.ALPHA
+        if 'b' in version:
+            version_type |= cls.BETA
+        if 'rc' in version:
+            version_type |= cls.RC
+        if 'dev' in version:
+            version_type |= cls.DEV
+        return version_type
+
+
+def _parse_args(args: List[str]) -> Tuple[str, str, Optional[VersionType], bool]:
     parameters = parser.parse_args(args)
     module_name = parameters.module
     module = _resolve_module(module_name)
-    return module_name, module.__version__
+    version_type = _parse_version_type(parameters)
+    return module_name, module.__version__, version_type, parameters.dry
 
 
-def _resolve_module(module_name: str):
+def _parse_version_type(parameters):
+    if not any([parameters.release, parameters.alpha, parameters.beta, parameters.rc, parameters.dev]):
+        return None
+    if parameters.release:
+        if any([parameters.alpha, parameters.beta, parameters.rc, parameters.dev]):
+            raise InvalidRequirements('--release cannot be combined with --alpha, --beta, --rc, or --dev')
+        version_type = VersionType.RELEASE
+    elif parameters.alpha:
+        if any([parameters.beta, parameters.rc]):
+            raise InvalidRequirements('--alpha, --beta and --rc cannot be combined')
+        version_type = VersionType.ALPHA
+    elif parameters.beta:
+        if any([parameters.alpha, parameters.rc]):
+            raise InvalidRequirements('--alpha, --beta and --rc cannot be combined')
+        version_type = VersionType.BETA
+    elif parameters.rc:
+        if any([parameters.alpha, parameters.beta]):
+            raise InvalidRequirements('--alpha, --beta and --rc cannot be combined')
+        version_type = VersionType.RC
+    else:
+        version_type = VersionType.RELEASE
+    if parameters.dev:
+        version_type |= VersionType.DEV
+    return version_type
+
+
+def _resolve_module(module_name: str) -> Any:
     """Black magic. Prevents loading a package from cv dependencies."""
     invalidate_caches()
     old_module = sys.modules.pop(module_name, None)
@@ -73,15 +148,24 @@ def _resolve_module(module_name: str):
     return module
 
 
-def check_version_format(name: str, version: str):
+def check_version_format(name: str, version: str) -> None:
     if safe_version(version) != version:
         raise InvalidVersionFormat(name, version)
 
 
+def check_version_type(expected_version_type, version) -> None:
+    actual_version_type = VersionType.parse(version)
+    if actual_version_type != expected_version_type:
+        raise VersionTypeMismatch(expected_version_type, version, actual_version_type, expected_version_type)
+
+
 def main(args):
-    name, version = _parse_args(args)
+    name, version, expected_version_type, dry = _parse_args(args)
     check_version_format(name, version)
-    check_unique(name, version)
+    if expected_version_type is not None:
+        check_version_type(expected_version_type, version)
+    if not dry:
+        check_unique(name, version)
     print(f'OK: {name} {version} is valid and not present on PyPI.')
 
 
