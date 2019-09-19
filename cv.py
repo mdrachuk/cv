@@ -63,7 +63,11 @@ class PypiError(Exception):
         super().__init__(f'Package "{name}" could not be fetched from PyPI. ')
 
 
-parser = ArgumentParser(description='Check version of a Python package or module.')
+parser = ArgumentParser(description='Check version of a Python package or module.',
+                        usage='Provide a module with "__version__" or a package with "__init__.py" '
+                              'defining a "__version__".\n'
+                              'cv will search PyPI and raise an exception if such a version exists '
+                              'or if the version is malformed.')
 parser.add_argument('module', type=str, help='the package/module to check')
 
 parser.add_argument('--alpha', action='store_true', default=False,
