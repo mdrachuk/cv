@@ -8,7 +8,7 @@ Finishes with an VersionExists exception and a non-zero exit code if the version
 """
 from __future__ import annotations
 
-__version__ = '1.0.0rc0'
+__version__ = '1.0.0'
 
 import json
 from enum import IntFlag
