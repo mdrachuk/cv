@@ -69,12 +69,12 @@ parser.add_argument('module', type=str, help='the package/module to check')
 parser.add_argument('--alpha', action='store_true', default=False,
                     help='check that version is an alpha, e.g. 1.0.0a1')
 parser.add_argument('--beta', action='store_true', default=False,
-                    help='check that version is an beta, e.g. 1.0.0b2')
+                    help='check that version is a beta, e.g. 1.0.0b2')
 parser.add_argument('--rc', action='store_true', default=False,
                     help='check that version is a release candidate, e.g. 1.0.0rc')
 
 parser.add_argument('--dev', action='store_true', default=False,
-                    help='check that version is a release in development, e.g. 1.0.0.dev3')
+                    help='check that version is in development, e.g. 1.0.0.dev3')
 
 parser.add_argument('--release', action='store_true', default=False,
                     help='check that version is a release without modifiers, e.g. 1.0.0')
