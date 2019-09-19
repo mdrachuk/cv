@@ -8,7 +8,7 @@ Finishes with an VersionExists exception and a non-zero exit code if the version
 """
 from __future__ import annotations
 
-__version__ = '1.0.0.dev9'
+__version__ = '1.0.0.dev10'
 
 import json
 from urllib.error import HTTPError
