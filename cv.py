@@ -8,7 +8,7 @@ Finishes with an VersionExists exception and a non-zero exit code if the version
 """
 from __future__ import annotations
 
-__version__ = '1.0.0.dev10'
+__version__ = '1.0.0.dev11'
 
 import json
 from enum import IntFlag
@@ -19,14 +19,14 @@ import os
 import sys
 from argparse import ArgumentParser
 from importlib import invalidate_caches, import_module
-from typing import List, Tuple, Any, Optional
+from typing import List, Any, Optional, NamedTuple
 
 from pkg_resources import safe_version
 
 
-def check_unique(name: str, version: str):
+def check_unique(name: str, version: str, warehouse: str = 'https://pypi.org/pypi') -> None:
     try:
-        response = urlopen(f'https://pypi.org/pypi/{name}/json')
+        response = urlopen(f'{warehouse}/{name}/json')
     except HTTPError as e:
         raise PypiError(name) from e
     data = json.loads(response.read())
@@ -35,56 +35,15 @@ def check_unique(name: str, version: str):
         raise VersionExists(name, version)
 
 
-class InvalidRequirements(Exception):
-    ...
+def check_version_format(name: str, version: str) -> None:
+    if safe_version(version) != version:
+        raise InvalidVersionFormat(name, version)
 
 
-class VersionTypeMismatch(Exception):
-    def __init__(self, name: str, version: str, actual: VersionType, expected: VersionType):
-        super().__init__(f'Package "{name}" version {version} was specified to be {repr(expected)}, '
-                         f'but actually it is {repr(actual)} ')
-
-
-class InvalidVersionFormat(Exception):
-    def __init__(self, name: str, version: str):
-        super().__init__(f'Package "{name}" version "{version}" is not formatted according to PEP 440.'
-                         f'Proper version may be "{safe_version(version)}.'
-                         f'Read more: https://www.python.org/dev/peps/pep-0440/')
-
-
-class VersionExists(Exception):
-    def __init__(self, name: str, version: str):
-        super().__init__(f'Package "{name}" with version "{version}" already exists on PyPI.{os.linesep}'
-                         f'Change the "{name}.__version__" or "{name}.__init__.__version__" to fix this error.')
-
-
-class PypiError(Exception):
-    def __init__(self, name: str):
-        super().__init__(f'Package "{name}" could not be fetched from PyPI. ')
-
-
-parser = ArgumentParser(description='Check version of a Python package or module.',
-                        usage='Provide a module with "__version__" or a package with "__init__.py" '
-                              'defining a "__version__".\n'
-                              'cv will search PyPI and raise an exception if such a version exists '
-                              'or if the version is malformed.')
-parser.add_argument('module', type=str, help='the package/module to check')
-
-parser.add_argument('--alpha', action='store_true', default=False,
-                    help='check that version is an alpha, e.g. 1.0.0a1')
-parser.add_argument('--beta', action='store_true', default=False,
-                    help='check that version is a beta, e.g. 1.0.0b2')
-parser.add_argument('--rc', action='store_true', default=False,
-                    help='check that version is a release candidate, e.g. 1.0.0rc')
-
-parser.add_argument('--dev', action='store_true', default=False,
-                    help='check that version is in development, e.g. 1.0.0.dev3')
-
-parser.add_argument('--release', action='store_true', default=False,
-                    help='check that version is a release without modifiers, e.g. 1.0.0')
-
-parser.add_argument('--dry', action='store_true', default=False,
-                    help='make no request to PyPI')
+def check_version_type(expected: VersionType, version: str) -> None:
+    actual = VersionType.parse(version)
+    if actual != expected:
+        raise VersionTypeMismatch(version, actual, expected)
 
 
 class VersionType(IntFlag):
@@ -108,12 +67,78 @@ class VersionType(IntFlag):
         return version_type
 
 
-def _parse_args(args: List[str]) -> Tuple[str, str, Optional[VersionType], bool]:
+class InvalidRequirements(Exception):
+    ...
+
+
+class VersionTypeMismatch(Exception):
+    def __init__(self, version: str, actual: VersionType, expected: VersionType):
+        super().__init__(f'Package version {version} was specified to be {repr(expected)}, '
+                         f'but actually it is {repr(actual)} ')
+
+
+class InvalidVersionFormat(Exception):
+    def __init__(self, name: str, version: str):
+        super().__init__(f'Package "{name}" version "{version}" is not formatted according to PEP 440.'
+                         f'Proper version may be "{safe_version(version)}.'
+                         f'Read more: https://www.python.org/dev/peps/pep-0440/')
+
+
+class VersionExists(Exception):
+    def __init__(self, name: str, version: str):
+        super().__init__(f'Package "{name}" with version "{version}" already exists on PyPI.{os.linesep}'
+                         f'Change the "{name}.__version__" or "{name}.__init__.__version__" to fix this error.')
+
+
+class PypiError(Exception):
+    def __init__(self, name: str):
+        super().__init__(f'Package "{name}" could not be fetched from PyPI. ')
+
+
+parser = ArgumentParser(description='Check version of a Python package or module.')
+parser.add_argument('module', type=str, help='the package/module with "__version__" defined')
+
+parser.add_argument('-w', '--warehouse', type=str, default='https://pypi.org/pypi',
+                    help='package index to use, default is "https://pypi.org/pypi"')
+
+parser.add_argument('--alpha', action='store_true', default=False,
+                    help='check that version is an alpha, e.g. 1.0.0a1')
+parser.add_argument('--beta', action='store_true', default=False,
+                    help='check that version is a beta, e.g. 1.0.0b2')
+parser.add_argument('--rc', action='store_true', default=False,
+                    help='check that version is a release candidate, e.g. 1.0.0rc')
+
+parser.add_argument('--dev', action='store_true', default=False,
+                    help='check that version is in development, e.g. 1.0.0.dev3')
+
+parser.add_argument('--release', action='store_true', default=False,
+                    help='check that version is a release without modifiers, e.g. 1.0.0')
+
+parser.add_argument('--dry', action='store_true', default=False,
+                    help='make no request to PyPI')
+
+
+class Parameters(NamedTuple):
+    warehouse: str
+    package: str
+    version: str
+    expected_type: Optional[VersionType]
+    dry_run: bool
+
+
+def _parse_args(args: List[str]) -> Parameters:
     parameters = parser.parse_args(args)
     module_name = parameters.module
     module = _resolve_module(module_name)
     version_type = _parse_version_type(parameters)
-    return module_name, module.__version__, version_type, parameters.dry
+
+    return Parameters(
+        parameters.warehouse,
+        module_name,
+        module.__version__,
+        version_type,
+        parameters.dry
+    )
 
 
 def _parse_version_type(parameters):
@@ -150,25 +175,14 @@ def _resolve_module(module_name: str) -> Any:
     return module
 
 
-def check_version_format(name: str, version: str) -> None:
-    if safe_version(version) != version:
-        raise InvalidVersionFormat(name, version)
-
-
-def check_version_type(expected_version_type, version) -> None:
-    actual_version_type = VersionType.parse(version)
-    if actual_version_type != expected_version_type:
-        raise VersionTypeMismatch(expected_version_type, version, actual_version_type, expected_version_type)
-
-
 def main(args):
-    name, version, expected_version_type, dry = _parse_args(args)
-    check_version_format(name, version)
-    if expected_version_type is not None:
-        check_version_type(expected_version_type, version)
-    if not dry:
-        check_unique(name, version)
-    print(f'OK: {name} {version} is valid and not present on PyPI.')
+    p = _parse_args(args)
+    check_version_format(p.package, p.version)
+    if p.expected_type is not None:
+        check_version_type(p.expected_type, p.version)
+    if not p.dry_run:
+        check_unique(p.package, version=p.version, warehouse=p.warehouse)
+    print(f'OK: {p.package} {p.version} is valid and not present on PyPI.')
 
 
 if __name__ == '__main__':

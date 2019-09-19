@@ -55,22 +55,28 @@ Packages work in the same way as modules except `__version__` is defined in `<mo
 ## Help
 ```shell
 $ cv --help
-usage: Provide a module with "__version__" or a package with "__init__.py" defining a "__version__".
-cv will search PyPI and raise an exception if such a version exists or if the version is malformed.
+usage: cv [-h] [-w WAREHOUSE] [--alpha] [--beta] [--rc] [--dev] [--release]
+          [--dry]
+          module
 
 Check version of a Python package or module.
 
 positional arguments:
-  module      the package/module to check
+  module                the package/module with "__version__" defined
 
 optional arguments:
-  -h, --help  show this help message and exit
-  --alpha     check that version is an alpha, e.g. 1.0.0a1
-  --beta      check that version is a beta, e.g. 1.0.0b2
-  --rc        check that version is a release candidate, e.g. 1.0.0rc
-  --dev       check that version is in development, e.g. 1.0.0.dev3
-  --release   check that version is a release without modifiers, e.g. 1.0.0
-  --dry       make no request to PyPI
+  -h, --help            show this help message and exit
+  -w WAREHOUSE, --warehouse WAREHOUSE
+                        package index to use, default is
+                        "https://pypi.org/pypi"
+  --alpha               check that version is an alpha, e.g. 1.0.0a1
+  --beta                check that version is a beta, e.g. 1.0.0b2
+  --rc                  check that version is a release candidate, e.g.
+                        1.0.0rc
+  --dev                 check that version is in development, e.g. 1.0.0.dev3
+  --release             check that version is a release without modifiers,
+                        e.g. 1.0.0
+  --dry                 make no request to PyPI
 ```
 
 [pypi]: https://pypi.org/project/cv/
